@@ -1,0 +1,4 @@
+#!/bin/bash
+gcc ./src/main.c ./src/allocator.h ./src/allocator.c ./src/logger.h ./src/logger.c -o allocator -Wall
+./allocator
+rm -rf ./allocator
