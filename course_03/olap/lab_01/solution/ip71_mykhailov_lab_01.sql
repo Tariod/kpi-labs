@@ -14,7 +14,7 @@ JOIN store s2 ON s1.product = s2.product;
 SELECT shelf, sum(quantity::INTEGER) AS shelf_sum FROM store
     WHERE quantity ~ '^[0-9]+$'
         GROUP BY shelf
-            HAVING sum(quantity::INTEGER) < 30
+            HAVING sum(quantity::INTEGER) <= 30
     ORDER BY shelf_sum;
 
 -- Діапазон дат: 01.01.2011 -  31.05.2014. Використайте
@@ -38,4 +38,3 @@ SELECT id_stuff FROM invoice
 
 SELECT * FROM store
     WHERE oper_type ~* '^(in|out)$';
-

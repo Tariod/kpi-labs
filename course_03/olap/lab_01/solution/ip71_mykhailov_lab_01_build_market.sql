@@ -1,131 +1,131 @@
-CREATE TABLE contact_type (
-  "Id" SERIAL PRIMARY KEY,
-  "Type" VARCHAR(40) NOT NULL UNIQUE
+CREATE TYPE CUSTOMER_CONTACT_TYPE AS ENUM (
+    'Email',
+    'Telephone number'
+);
+
+CREATE TYPE EMPLOYEE_CONTACT_TYPE AS ENUM (
+    'Email',
+    'Telephone number'
 );
 
 CREATE TABLE discounts (
-  "Id" VARCHAR(13) UNIQUE,
-  "Status" BOOLEAN DEFAULT false,
-  "ActivationDate" DATE,
-  "Balance" INT DEFAULT 0
+    "Id"                VARCHAR(13)         UNIQUE,
+    "Status"            BOOLEAN             DEFAULT false,
+    "Discount"          SMALLINT            DEFAULT 0
 );
 
 CREATE TABLE customers (
-  "Id" SERIAL PRIMARY KEY,
-  "Login" VARCHAR(13) REFERENCES discounts("Id") ON DELETE RESTRICT,
-  "LastName" VARCHAR(20),
-  "FirstName" VARCHAR(10),
-  "RegistrationDate" DATE DEFAULT CURRENT_DATE
+    "Id"                  SERIAL PRIMARY KEY,
+    "Login"               VARCHAR(30) REFERENCES discounts("Id") ON DELETE RESTRICT,
+    "LastName"            VARCHAR(30),
+    "FirstName"           VARCHAR(30),
+    "RegistrationDate"    DATE DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE customer_contacts (
-  "CustomerId" INT REFERENCES customers("Id") ON DELETE RESTRICT,
-  "ContactTypeId" INT REFERENCES contact_type("Id") ON DELETE RESTRICT,
-  "Contact" VARCHAR(100)
+    "CustomerId"      INT REFERENCES customers("Id") ON DELETE RESTRICT,
+    "ContactType"     CUSTOMER_CONTACT_TYPE   NOT NULL,
+    "Contact"         TEXT                    NOT NULL
 );
 
 CREATE TABLE departments (
-  "Id" SERIAL PRIMARY KEY,
-  "DepartmentName" TEXT NOT NULL,
-  "Address" TEXT NOT NULL
+    "Id"              SERIAL PRIMARY KEY,
+    "Address"         TEXT            NOT NULL,
+    "DepartmentName"  TEXT            NOT NULL
 );
 
 CREATE TABLE branches (
-  "Id" SERIAL PRIMARY KEY,
-  "DepartmentId" INT REFERENCES departments("Id") ON DELETE RESTRICT,
-  "BranchName" TEXT NOT NULL,
-  "Address" TEXT NOT NULL,
-  "TelephoneNumber" VARCHAR(13) NOT NULL
+    "Id"              SERIAL PRIMARY KEY,
+    "DepartmentId"    INT REFERENCES departments("Id") ON DELETE RESTRICT,
+    "Address"         TEXT                NOT NULL,
+    "BranchName"      TEXT                NOT NULL,
+    "TelephoneNumber" VARCHAR(13)         NOT NULL
 );
 
 CREATE TABLE job_type (
-  "Id" SERIAL PRIMARY KEY,
-  "Type" VARCHAR(40) NOT NULL UNIQUE
+    "Id"      SERIAL PRIMARY KEY,
+    "Type"    TEXT         NOT NULL UNIQUE
 );
 
 CREATE TABLE employees (
-  "Id" SERIAL PRIMARY KEY,
-  "BranchId" INT REFERENCES branches("Id") ON DELETE RESTRICT,
-  "JobId" INT REFERENCES job_type("Id") ON DELETE RESTRICT,
-  "Login" VARCHAR(20) NOT NULL UNIQUE,
-  "LastName" VARCHAR(20),
-  "FirstName" VARCHAR(10),
-  "HireDate" DATE DEFAULT CURRENT_DATE
+    "Id"          SERIAL PRIMARY KEY,
+    "BranchId"    INT REFERENCES branches("Id") ON DELETE RESTRICT,
+    "JobId"       INT REFERENCES job_type("Id") ON DELETE RESTRICT,
+    "Login"       VARCHAR(13)         NOT NULL UNIQUE,
+    "LastName"    TEXT                NOT NULL,
+    "FirstName"   TEXT                NOT NULL,
+    "HireDate"    DATE                DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE employee_contacts (
-  "EmployeeId" INT REFERENCES employees("Id") ON DELETE RESTRICT,
-  "ContactTypeId" INT REFERENCES contact_type("Id") ON DELETE RESTRICT,
-  "Contact" VARCHAR(40)
+    "EmployeeId"      INT REFERENCES employees("Id") ON DELETE RESTRICT,
+    "ContactType"     EMPLOYEE_CONTACT_TYPE         NOT NULL,
+    "Contact"         TEXT                          NOT NULL
 );
 
 CREATE TABLE categories (
-  "Id" SERIAL UNIQUE,
-  "ParentId" INT REFERENCES categories("Id") ON DELETE RESTRICT,
-  "CategoryName" VARCHAR UNIQUE
+    "ParentId"        INT REFERENCES categories("Id") ON DELETE RESTRICT,
+    "Id"              SERIAL            UNIQUE,
+    "CategoryName"    TEXT              UNIQUE
 );
 
 CREATE TABLE suppliers (
-  "Id" SERIAL PRIMARY KEY,
-  "CompanyName" VARCHAR(100) UNIQUE NOT NULL,
-  "Address" TEXT NOT NULL,
-  "TelephoneNumber" VARCHAR(13) NOT NULL
+    "Id"                  SERIAL PRIMARY KEY,
+    "Address"             TEXT                NOT NULL,
+    "CompanyName"         TEXT                UNIQUE NOT NULL,
+    "TelephoneNumber"     VARCHAR(13)         NOT NULL
 );
 
 CREATE TABLE products (
-  "Id" SERIAL PRIMARY KEY,
-  "CategoryId" INT REFERENCES categories("Id") ON DELETE RESTRICT,
-  "SupplierId" INT REFERENCES suppliers("Id") ON DELETE RESTRICT,
-  "ProductName" VARCHAR(100) NOT NULL,
-  "UnitPrice" REAL NOT NULL,
-  "Discontinued" BOOLEAN DEFAULT FALSE
+    "Id"                SERIAL PRIMARY KEY,
+    "CategoryId"        INT REFERENCES categories("Id") ON DELETE RESTRICT,
+    "SupplierId"        INT REFERENCES suppliers("Id") ON DELETE RESTRICT,
+    "ProductName"       TEXT            NOT NULL,
+    "UnitPrice"         REAL            NOT NULL,
+    "Discontinued"      BOOLEAN         DEFAULT FALSE
 );
 
 CREATE TABLE cells (
-  "Id" SERIAL PRIMARY KEY,
-  "CellName" VARCHAR(40) UNIQUE NOT NULL,
-  "Free" BOOLEAN DEFAULT true
+    "Id"            SERIAL PRIMARY KEY,
+    "CellName"      VARCHAR(10)         UNIQUE NOT NULL,
+    "Free"          BOOLEAN             DEFAULT true
 );
 
 CREATE TABLE store (
-  "ProductId" INT REFERENCES products("Id") ON DELETE RESTRICT,
-  "CellId" INT REFERENCES cells("Id") ON DELETE RESTRICT,
-  "Quantity" INT NOT NULL
+    "ProductId"     INT REFERENCES products("Id") ON DELETE RESTRICT,
+    "CellId"        INT REFERENCES cells("Id") ON DELETE RESTRICT,
+    "Quantity"      INT         NOT NULL
 );
 
 CREATE TABLE orders (
-  "Id" SERIAL PRIMARY KEY,
-  "CustomerId" INT REFERENCES customers("Id") ON DELETE RESTRICT,
-  "EmployeeId" INT REFERENCES employees("Id") ON DELETE RESTRICT,
-  "Address" TEXT,
-  "OrderDate" DATE DEFAULT CURRENT_DATE NOT NULL,
-  "ShippedDate" DATE
+    "Id"              SERIAL PRIMARY KEY,
+    "CustomerId"      INT REFERENCES customers("Id") ON DELETE RESTRICT,
+    "EmployeeId"      INT REFERENCES employees("Id") ON DELETE RESTRICT,
+    "OrderDate"       DATE            DEFAULT CURRENT_DATE NOT NULL,
+    "ShippedDate"     DATE,
+    "Address"         TEXT
 );
 
 CREATE TABLE order_details (
-  "OrderId" INT REFERENCES orders("Id") ON DELETE RESTRICT,
-  "ProductId" INT REFERENCES products("Id") ON DELETE RESTRICT,
-  "UnitPrice" REAL NOT NULL,
-  "Quantity" INT NOT NULL
+    "OrderId"       INT REFERENCES orders("Id") ON DELETE RESTRICT,
+    "ProductId"     INT REFERENCES products("Id") ON DELETE RESTRICT,
+    "UnitPrice"     REAL            NOT NULL,
+    "Quantity"      INT             NOT NULL
 );
 
-INSERT INTO contact_type ("Type")
-    VALUES ('Email'),
-    ('Telephone number');
-
-INSERT INTO discounts ("Id", "Status", "ActivationDate")
-    VALUES (null, false, CURRENT_DATE),
-        ('1000000000000', false, null),
-        ('1000000000001', true, CURRENT_DATE);
+INSERT INTO discounts ("Id", "Status", "Discount")
+    VALUES (null, false, 0),
+        ('1000000000000', false, 5),
+        ('1000000000001', true, 5);
 
 INSERT INTO customers ("Login", "LastName", "FirstName")
     VALUES (null, 'Default', 'User'),
         ('1000000000001', 'Иванов', 'Иван');
 
-INSERT INTO customer_contacts ("CustomerId", "ContactTypeId", "Contact")
+INSERT INTO customer_contacts ("CustomerId", "ContactType", "Contact")
     VALUES (
         (SELECT "Id" FROM customers WHERE "Login" = '1000000000001'),
-        (SELECT "Id" FROM contact_type WHERE "Type" = 'Email'),
+        'Email',
         'qwert12345@gmail.com'
     );
 
@@ -190,22 +190,22 @@ INSERT INTO employees ("BranchId", "JobId", "Login", "LastName", "FirstName")
                'Андрей'
             );
 
-INSERT INTO employee_contacts ("EmployeeId", "ContactTypeId", "Contact")
+INSERT INTO employee_contacts ("EmployeeId", "ContactType", "Contact")
     VALUES (
         (SELECT "Id" FROM employees WHERE "Login" = 'login1'),
-        (SELECT "Id" FROM contact_type WHERE "Type" = 'Email'),
+        'Email',
         'qwert12346@gmail.com'
     ), (
         (SELECT "Id" FROM employees WHERE "Login" = 'login2'),
-        (SELECT "Id" FROM contact_type WHERE "Type" = 'Email'),
+        'Email',
         'qwert12347@gmail.com'
     ), (
         (SELECT "Id" FROM employees WHERE "Login" = 'login3'),
-        (SELECT "Id" FROM contact_type WHERE "Type" = 'Email'),
+        'Email',
         'qwert12348@gmail.com'
     ), (
         (SELECT "Id" FROM employees WHERE "Login" = 'login4'),
-        (SELECT "Id" FROM contact_type WHERE "Type" = 'Email'),
+        'Email',
         'qwert12349@gmail.com'
     );
 
@@ -330,7 +330,8 @@ WITH RECURSIVE hierarchy ("Id", "Path") AS (
 )
 SELECT ARRAY_TO_STRING("Path", '/') AS "Path", count(p."Id") AS "Quantity" FROM hierarchy h
 LEFT JOIN products p ON h."Id" = p."CategoryId"
-GROUP BY h."Path";
+GROUP BY h."Path"
+ORDER BY h."Path";
 
 -- WITH RECURSIVE hierarchy ("Id", "CategoryName", "Level", "Path") AS (
 --     SELECT "Id", "CategoryName", 0, ARRAY["CategoryName"] FROM categories
