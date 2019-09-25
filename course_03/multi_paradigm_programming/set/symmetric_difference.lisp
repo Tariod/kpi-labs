@@ -37,3 +37,10 @@
     (T (my_intersection (cdr set1) set2))
   )
 )
+
+(defun my_symmetric_difference (set1 set2)
+  (my_complement
+    (my_union set2 set1)
+    (my_intersection set1 set2)
+  )
+)
