@@ -45,4 +45,14 @@
     функции eval.
 |#
 
+(defun funcall_example (lst callback)
+  (cond
+    ((evenp (funcall callback lst))
+      (> (funcall callback lst) 0))
+    (T lst)
+  )
+)
+
+(print (funcall_example '(1 2 3) 'CAR))
+(print (funcall_example '(4 1 2 3) 'CAR))
 (terpri)
