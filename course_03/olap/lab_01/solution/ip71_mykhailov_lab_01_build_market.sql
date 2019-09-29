@@ -57,6 +57,11 @@ CREATE TABLE employees (
     "HireDate"    DATE                DEFAULT CURRENT_DATE
 );
 
+CREATE TABLE features (
+  "Id" SERIAL PRIMARY KEY,
+  "Feature" TEXT NOT NULL
+);
+
 CREATE TABLE employee_contacts (
     "EmployeeId"      INT REFERENCES employees("Id") ON DELETE RESTRICT,
     "ContactType"     EMPLOYEE_CONTACT_TYPE         NOT NULL,
@@ -67,6 +72,11 @@ CREATE TABLE categories (
     "ParentId"        INT REFERENCES categories("Id") ON DELETE RESTRICT,
     "Id"              SERIAL            UNIQUE,
     "CategoryName"    TEXT              UNIQUE
+);
+
+CREATE TABLE category_features (
+    "CategoryId" INT REFERENCES categories("Id") ON DELETE RESTRICT,
+    "FeatureId" INT REFERENCES features("Id") ON DELETE RESTRICT
 );
 
 CREATE TABLE suppliers (
@@ -83,6 +93,12 @@ CREATE TABLE products (
     "ProductName"       TEXT            NOT NULL,
     "UnitPrice"         REAL            NOT NULL,
     "Discontinued"      BOOLEAN         DEFAULT FALSE
+);
+
+CREATE TABLE product_features (
+    "ProductId" INT REFERENCES products("Id") ON DELETE RESTRICT,
+    "FeatureId" INT REFERENCES features("Id") ON DELETE RESTRICT,
+    "Value" TEXT
 );
 
 CREATE TABLE cells (
@@ -333,35 +349,20 @@ LEFT JOIN products p ON h."Id" = p."CategoryId"
 GROUP BY h."Path"
 ORDER BY h."Path";
 
--- WITH RECURSIVE hierarchy ("Id", "CategoryName", "Level", "Path") AS (
---     SELECT "Id", "CategoryName", 0, ARRAY["CategoryName"] FROM categories
---         WHERE "ParentId" IS NULL
---     UNION ALL
---     SELECT c."Id", c."CategoryName", h."Level" + 1, ARRAY_APPEND(h."Path", c."CategoryName") FROM categories c
---     INNER JOIN hierarchy h ON h."Id" = c."ParentId"
--- )
--- SELECT "Level", "CategoryName", ARRAY_TO_STRING("Path", '/') AS "Path" FROM hierarchy;
-
-
--- WITH RECURSIVE hierarchy ("Id", "CategoryName", "Path") AS (
---     SELECT "Id", "CategoryName", ARRAY["CategoryName"] FROM categories
---         WHERE "ParentId" IS NULL
---     UNION ALL
---     SELECT c."Id", c."CategoryName", ARRAY_APPEND(h."Path", c."CategoryName") FROM categories c
---     INNER JOIN hierarchy h ON h."Id" = c."ParentId"
--- )
--- SELECT "CategoryName", ARRAY_TO_STRING("Path", '/') AS "Path" FROM hierarchy;
-
-
--- SELECT supplier, count(DISTINCT product) as products from store
---     GROUP BY supplier
---         HAVING count(DISTINCT product) > 1;
+WITH RECURSIVE hierarchy ("Id", "CategoryName", "Level", "Path") AS (
+    SELECT "Id", "CategoryName", 0, ARRAY["CategoryName"] FROM categories
+        WHERE "ParentId" IS NULL
+    UNION ALL
+    SELECT c."Id", c."CategoryName", h."Level" + 1, ARRAY_APPEND(h."Path", c."CategoryName") FROM categories c
+    INNER JOIN hierarchy h ON h."Id" = c."ParentId"
+)
+SELECT "Level", "CategoryName", ARRAY_TO_STRING("Path", '/') AS "Path" FROM hierarchy;
 
 -- INSERT INTO cells ("CellName", "Free") VALUES ();
---
+
 -- INSERT INTO store ("ProductId", "CellId", "Quantity") VALUES ();
---
+
 -- INSERT INTO orders ("CustomerId", "EmployeeId", "OrderDate", "ShippedDate") VALUES ();
---
+
 -- INSERT INTO order_details ("OrderId", "ProductId", "UnitPrice", "Quantity") VALUES ();
 

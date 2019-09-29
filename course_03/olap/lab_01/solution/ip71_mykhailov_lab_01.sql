@@ -24,7 +24,6 @@ SELECT * FROM invoice
     WHERE invoice_date ~ '\d{2}.\d{2}.\d{4}'
         AND invoice_date::DATE BETWEEN '2011-01-01' AND '2014-05-31';
 
-
 -- Одному і тому ж значенню поля ID_STUFF повинні відповідати
 -- одні й ті ж значення полів STUFF_NAME, E_MAIL таблиці INVOICE.
 
