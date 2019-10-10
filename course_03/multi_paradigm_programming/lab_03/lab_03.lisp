@@ -5,6 +5,7 @@
     (with-standard-io-syntax (print db out))
     (format out "~%")
   )
+  db
 )
 
 (defun load-db(path)
@@ -100,6 +101,12 @@
   NIL
 )
 
+(defun kvstorage-keys(kvstorage)
+  (if (not (null (check-kvstorage-type kvstorage)))
+    (cons (caar (check-structure kvstorage)) (kvstorage-keys (cdr kvstorage)))
+  )
+)
+
 (defun kvstorage-delete(kvstorage path key)
   (if (not (null (check-kvstorage-type kvstorage)))
     (if (null (check-path path))
@@ -183,4 +190,12 @@
       (error "Wrong path.")
     )
   )
+)
+
+(defun kvstorage-find(kvstorage path key callback)
+  (remove-if-not callback (kvstorage-get kvstorage path key))
+)
+
+(defun kvstorage-sort(kvstorage path key callback)
+  (sort (kvstorage-get kvstorage path key) callback)
 )
