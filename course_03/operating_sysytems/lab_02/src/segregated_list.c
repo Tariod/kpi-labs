@@ -161,33 +161,13 @@ void *mem_alloc(size_t size) {
 };
 
 void *mem_realloc(void *addr, size_t size) {
-  // pages_pool_t *pages_pool = heap.pages_pool;
-  // while (pages_pool != NULL) {
-  //   page_t *page = pages_pool->pages;
-  //   while (page != NULL &&
-  //     !(addr >= page->blocks->payload &&
-  //       addr < get_end_of_page(page->blocks->payload)
-  //     )
-  //   ) {
-  //     page = page->next;
-  //   }
-    
-  //   if (page != NULL) break;
-
-  //   pages_pool = pages_pool->next;
-  // }
-
-  // if (pages_pool == NULL) {
-  //   return NULL;
-  // }
-
   size_t block_size = align(size);
   void *new_addr = mem_alloc(block_size);
   if (new_addr == NULL) {
     return NULL;
   }
 
-  memcpy(new_addr, addr, block_size);
+  memcpy(new_addr, addr, size);
   mem_free(addr);
   return new_addr;
 };
@@ -357,7 +337,7 @@ static bool is_page_free(page_t *page) {
   block_t *block = page->blocks;
   while (block != NULL) {
     if (!block->free) {
-      return block->free;
+      return false;
     }
     block = block->next;
   }
