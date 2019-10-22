@@ -22,7 +22,17 @@ typedef struct pages_pool {
   struct pages_pool *next;
 } pages_pool_t;
 
+struct heap_t {
+  size_t size;
+  pages_pool_t *pages_pool;
+  void *paylaod;
+};
+
 bool mem_pool_alloc(void);
+
+bool mem_pool_alloc_size(size_t size);
+
+struct heap_t get_heap(void);
 
 void *mem_alloc(size_t size);
 

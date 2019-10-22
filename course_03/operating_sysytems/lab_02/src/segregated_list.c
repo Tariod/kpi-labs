@@ -2,11 +2,7 @@
 #include <string.h>
 #include "segregated_list.h"
 
-struct heap_t {
-  size_t size;
-  pages_pool_t *pages_pool;
-  void *paylaod;
-} heap = { 0, NULL, NULL };
+struct heap_t heap = { 0, NULL, NULL };
 
 // Private functions
 
@@ -27,12 +23,17 @@ static void *get_end_of_page(void *begin);
 
 // Implementation of public functions
 
-bool mem_pool_alloc(void) {
+bool mem_pool_alloc_size(size_t size) {
   if (heap.paylaod != NULL) {
     return false;
   }
 
-  heap.size = PAGE_SIZE * 1024;
+  size = align(size);
+  if (size < PAGE_SIZE) {
+    size = PAGE_SIZE * 1024;
+  }
+
+  heap.size = size;
   heap.paylaod = malloc(heap.size);
   if (heap.paylaod == NULL) {
     heap.size = 0;
@@ -74,6 +75,10 @@ bool mem_pool_alloc(void) {
   return true;
 };
 
+bool mem_pool_alloc(void) {
+  return mem_pool_alloc_size(PAGE_SIZE * 1024);
+};
+
 void mem_pool_free(void) {
   if (heap.paylaod != NULL) {
     pages_pool_t *pages_pool = heap.pages_pool;
@@ -109,8 +114,15 @@ void mem_pool_free(void) {
   }
 };
 
+struct heap_t get_heap(void) {
+  return heap;
+}
+
 void *mem_alloc(size_t size) {
   size_t block_size = align(size);
+  if (size > PAGE_SIZE) {
+    return NULL;
+  }
   pages_pool_t *pages_pool = get_pages_pool(block_size);
   if (pages_pool == NULL) {
     pages_pool_t *empty_pages_pool = get_empty_pages_pool();
