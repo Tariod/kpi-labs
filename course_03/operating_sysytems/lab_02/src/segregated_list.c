@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stdio.h>
+#include <string.h>
 #include "segregated_list.h"
 
 struct heap_t {
@@ -21,6 +21,9 @@ static pages_pool_t *unshift_pages_pool(pages_pool_t *pages_pool);
 static page_t *segregate_page(page_t *page, size_t size);
 static page_t *shift_page(pages_pool_t *pages_pool);
 static page_t *unshift_page(pages_pool_t *pages_pool, page_t *page);
+static bool is_page_free(page_t *page);
+static page_t *cut_page(pages_pool_t *pages_pool, page_t *page);
+static void *get_end_of_page(void *begin);
 
 // Implementation of public functions
 
@@ -138,11 +141,77 @@ void *mem_alloc(size_t size) {
     page = segregate_page(page, block_size);
     unshift_page(pages_pool, page);
 
-    empty_block = page->blocks->payload;
+    empty_block = page->blocks;
   }
 
   empty_block->free = false;
   return empty_block->payload;
+};
+
+void *mem_realloc(void *addr, size_t size) {
+  // pages_pool_t *pages_pool = heap.pages_pool;
+  // while (pages_pool != NULL) {
+  //   page_t *page = pages_pool->pages;
+  //   while (page != NULL &&
+  //     !(addr >= page->blocks->payload &&
+  //       addr < get_end_of_page(page->blocks->payload)
+  //     )
+  //   ) {
+  //     page = page->next;
+  //   }
+    
+  //   if (page != NULL) break;
+
+  //   pages_pool = pages_pool->next;
+  // }
+
+  // if (pages_pool == NULL) {
+  //   return NULL;
+  // }
+
+  size_t block_size = align(size);
+  void *new_addr = mem_alloc(block_size);
+  if (new_addr == NULL) {
+    return NULL;
+  }
+
+  memcpy(new_addr, addr, block_size);
+  mem_free(addr);
+  return new_addr;
+};
+
+void mem_free(void *addr) {
+  pages_pool_t *pages_pool = heap.pages_pool;
+  page_t *page = NULL;
+  while (pages_pool != NULL) {
+    page = pages_pool->pages;
+    while (page != NULL &&
+      !(addr >= page->blocks->payload &&
+        addr < get_end_of_page(page->blocks->payload)
+      )
+    ) {
+      page = page->next;
+    }
+    
+    if (page != NULL) break;
+
+    pages_pool = pages_pool->next;
+  }
+
+  if (pages_pool != NULL && page != NULL) {
+    block_t *block = page->blocks;
+    while (block != NULL && block->payload != addr) {
+      block = block->next;
+    }
+
+    if (block != NULL) {
+      block->free = true;
+      if (is_page_free(page)) {
+        page = cut_page(pages_pool, page);
+        unshift_page(get_empty_pages_pool(), page);
+      }
+    }
+  }
 };
 
 // Implementation of private functions
@@ -270,4 +339,39 @@ static page_t *unshift_page(pages_pool_t *pages_pool, page_t *page) {
   pages_pool->pages = page;
 
   return page;
+};
+
+static bool is_page_free(page_t *page) {
+  block_t *block = page->blocks;
+  while (block != NULL) {
+    if (!block->free) {
+      return block->free;
+    }
+    block = block->next;
+  }
+  
+  return true;
+};
+
+static page_t *cut_page(pages_pool_t *pages_pool, page_t *page) {
+  page_t *prev = page->prev;
+  page_t *next = page->next;
+
+  if (prev == NULL) {
+    return shift_page(pages_pool);
+  }
+
+  prev->next = next;
+  if (next != NULL) {
+    next->prev = prev;
+  }
+
+  page->prev = NULL;
+  page->next = NULL;
+
+  return page;
+};
+
+static void *get_end_of_page(void *begin) {
+  return (void *)((size_t)begin + PAGE_SIZE);
 };
