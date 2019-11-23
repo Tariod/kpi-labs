@@ -1,2 +1,5 @@
 #Ignore Jetbrains editorconfig
 .idea/
+
+#Ignore Visual Studio Code editorconfig
+.vscode/
