@@ -3,13 +3,8 @@ import numpy as np
 import system_emulation.system as sys
 
 
-# def smooth(y, box_pts):
-#     box = np.ones(box_pts) / box_pts
-#     y_smooth = np.convolve(y, box, mode='same')
-#     return y_smooth
-
-system = sys.System(intensity=1, max_complexity=10)
-system.run()
+system = sys.System(intensity=0.75, end_time=400)
+system.run(True)
 history, _ = system.statistics()
 
 x1 = []
@@ -21,6 +16,7 @@ plt.figure()
 plt.subplot(3, 1, 1)
 plt.xlabel("Время ожидания")
 plt.ylabel("Количество заявок")
+
 plt.hist(x1)
 plt.grid()
 
@@ -28,7 +24,7 @@ plt.grid()
 x2 = np.arange(0, 2, 0.1)
 y2 = []
 for i in x2:
-    system = sys.System(i, 10, int(5000*(i + 0.1)))
+    system = sys.System(i, 4, int(1000*(i + 0.1)))
     system.run()
     history_of_bids, _ = system.statistics()
 
@@ -48,11 +44,11 @@ plt.plot(x2, y2)
 plt.grid()
 
 
-x3 = np.arange(0.01, 1, 0.01)
+x3 = np.arange(0.02, 1, 0.01)
 y3 = []
 
 for i in x3:
-    system = sys.System(i, max_complexity=10)
+    system = sys.System(i, end_time=5000, max_complexity=5)
     system.run()
     _, standing_time = system.statistics()
 
