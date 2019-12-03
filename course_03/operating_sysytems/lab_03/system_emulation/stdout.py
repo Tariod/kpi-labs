@@ -3,8 +3,9 @@ from scipy import mean
 
 
 class StandardOutput:
-    _counter = 0
-    _history = []
+    def __init__(self):
+        self._counter = 0
+        self._history = []
 
     def smooth(self):
         if len(self._history) > 0:

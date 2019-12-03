@@ -17,7 +17,6 @@ class System:
         self._stdin = StandardInput(intensity, max_complexity, end_time)
         self._stdout = StandardOutput()
         self._time = 0
-        self._stdout._history = []
 
     def tick(self):
         bids = self._stdin.tick(self._time)

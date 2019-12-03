@@ -16,7 +16,6 @@ plt.figure()
 plt.subplot(3, 1, 1)
 plt.xlabel("Время ожидания")
 plt.ylabel("Количество заявок")
-
 plt.hist(x1)
 plt.grid()
 
@@ -44,7 +43,7 @@ plt.plot(x2, y2)
 plt.grid()
 
 
-x3 = np.arange(0.02, 1, 0.01)
+x3 = np.arange(0.01, 1, 0.01)
 y3 = []
 
 for i in x3:
